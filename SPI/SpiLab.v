@@ -50,7 +50,7 @@ module SpiLab
 	fsm fsmLab
 	(
 	.i_Clk(clock_out_spi),
-	.RESET_N(SW[1]),
+	.i_Rst(SW[1]),
 	.i_Data(SW[0]),
 	.out_sate(fsm_state)
 	);
