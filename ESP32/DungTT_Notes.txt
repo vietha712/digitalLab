@@ -1,0 +1,14 @@
+19 Feb:
+
+fms.v: 
+- Build ok, test bench ok -> Implement FMS as requirments
+SpiLab.v:
+- Combine all function in FPGA (FMS + SPI)
+- Build ok
+- Need to test hw with ESP32
+SPI_Slave.v:
+- Build ok
+
+EPS32_SPI.ino: 
+- Build ok, change setting to be adapted with FPGA
+- Need to test hw with FPGA
