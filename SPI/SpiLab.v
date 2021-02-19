@@ -7,21 +7,35 @@
 
 module SpiLab
 	(
-	input[35:0] GPIO_0, //MOSI, CS, CLK
+	input[35:0]  GPIO_0, //MOSI, CS, CLK
 	output[35:0] GPIO_1, //MIsO
 	input CLOCK_50,
-	input[9:0] SW // i_Data, RESET_N
+	input[9:0] SW, // i_Data
+	input RESET_N  // RESET_N
 	);
 
 	localparam Spi_Mode = 0;
 	
 	//Slave specific
-	reg       w_Slave_RX_DV, r_Slave_TX_DV;
-	reg [7:0] w_Slave_RX_Byte, r_Slave_TX_Byte;
+	wire        w_Slave_RX_DV,   r_Slave_TX_DV;
+	wire  [7:0] w_Slave_RX_Byte;
+	reg   [7:0] r_Slave_TX_Byte;
+
 	reg r_Rst_L = 1'b0; //init with default value
 	
-	//FSM
-	reg[1:0] fsm_state;
+//	//FSM
+//	reg[1:0] fsm_state;
+	wire  [7:0] o_fsm_txdata;
+	reg   [7:0] o_fsm_rxdata;
+
+	always @(posedge CLOCK_50)
+		begin
+			if(SW[0] == 2'b1)
+				begin
+					o_fsm_rxdata[7:0] <= w_Slave_RX_Byte[7:0];
+					r_Slave_TX_Byte[7:0] <= o_fsm_txdata[7:0];
+				end
+		end
 	
 	//Clock divider variables
 	wire clock_out_spi;
@@ -32,15 +46,15 @@ module SpiLab
 	// Instantiate FPGA board as a slave to receive the command from ESP32
 	SPI_Slave #(.SPI_MODE(Spi_Mode)) spiSlaveHw
 	(
-	.i_Rst_L(r_Rst_L),
+	.i_Rst_L(RESET_N),
 	.i_Clk(clock_out_spi),
 	.o_RX_DV(w_Slave_RX_DV),
-	.o_RX_Byte(w_Slave_RX_Byte),
+	.o_RX_Byte(w_Slave_RX_Byte[7:0]),
 	.i_TX_DV(r_Slave_TX_DV),
-	.i_TX_Byte(r_Slave_TX_Byte),
+	.i_TX_Byte(r_Slave_TX_Byte[7:0]),
 	
 	//SPI interface
-	.i_SPI_Clk(GPIO_0[2]),
+	.i_SPI_Clk (GPIO_0[2]),
 	.o_SPI_MISO(GPIO_1[0]),
 	.i_SPI_MOSI(GPIO_0[0]),
 	.i_SPI_CS_n(GPIO_0[1])
@@ -50,17 +64,18 @@ module SpiLab
 	fsm fsmLab
 	(
 	.i_Clk(clock_out_spi),
-	.i_Rst(SW[1]),
-	.i_Data(SW[0]),
-	.o_State(fsm_state)
+	.i_Rst(RESET_N),
+	.i_Data (o_fsm_rxdata[0]),
+	.o_State(o_fsm_txdata[1:0])
 	);
 	
-	//Polling to wait for master's command
-	always @(posedge clock_out_spi)
-	
-	if(w_Slave_RX_Byte == 8'b11111111)
-		begin
-			r_Slave_TX_Byte <= fsm_state; //update FSM state to slave tx buffer
-		end
+//	//Polling to wait for master's command
+//	always @(posedge clock_out_spi)
+//	
+//	if(w_Slave_RX_Byte == 8'b11111111)
+//		begin
+//			r_Slave_TX_Byte <= fsm_state; //update FSM state to slave tx buffer
+//			//assign r_Slave_TX_Byte = fsm_state;
+//		end
 	
 endmodule
