@@ -52,7 +52,7 @@ module SpiLab
 	.i_Clk(clock_out_spi),
 	.i_Rst(SW[1]),
 	.i_Data(SW[0]),
-	.out_sate(fsm_state)
+	.o_State(fsm_state)
 	);
 	
 	//Polling to wait for master's command
