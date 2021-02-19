@@ -1,15 +1,15 @@
 /* finite state machine */
 
-module fsm(input i_Clk, input RESET_N, input i_Data);
+module fsm(input i_Clk, input RESET_N, input i_Data, output[1:0] out_state);
 	localparam IDLE        = 2'b00;
 	localparam STATE_1     = 2'b01;
 	localparam STATE_2     = 2'b10;
 	localparam STATE_3     = 2'b11;
-	reg fsm_state;
+	//reg fsm_state;
 
 	initial
 		begin
-			fsm_state = IDLE;
+			out_state = IDLE;
 		end
 
 	/*
@@ -33,38 +33,38 @@ module fsm(input i_Clk, input RESET_N, input i_Data);
 	begin
 		if (~RESET_N)
 		begin
-			fsm_state  <= IDLE;   // Resets to high
+			out_state  <= IDLE;   // Resets to high
 		end
 		else
 		begin
-			case (fsm_state)
+			case (out_state)
 				IDLE:
 					begin
 						if(i_Data == 1'b0)
-							fsm_state <= STATE_2;
+							out_state <= STATE_2;
 						else
-							fsm_state <= STATE_1;
+							out_state <= STATE_1;
 					end
 				STATE_1:
 					begin
 						if(i_Data == 1'b0)
-							fsm_state <= STATE_2;
+							out_state <= STATE_2;
 						else
-							fsm_state <= STATE_3;
+							out_state <= STATE_3;
 					end
 				STATE_2:
 					begin
 						if(i_Data == 1'b0)
-							fsm_state <= STATE_2;
+							out_state <= STATE_2;
 						else
-							fsm_state <= STATE_1;
+							out_state <= STATE_1;
 					end
 				STATE_3:
 					begin
 						if(i_Data == 1'b0)
-							fsm_state <= STATE_2;
+							out_state <= STATE_2;
 						else
-							fsm_state <= STATE_1;
+							out_state <= STATE_1;
 					end
 				default:
 					begin
@@ -72,6 +72,6 @@ module fsm(input i_Clk, input RESET_N, input i_Data);
 			endcase
 		end
 
-		$monitor("Current state machine 0x%X", fsm_state); 
+		//$monitor("Current state machine 0x%X", fsm_state); 
 	end
 endmodule
