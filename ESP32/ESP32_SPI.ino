@@ -10,7 +10,7 @@
 #include <SPI.h>
 
 uint8_t const ssFPGA = 5;
-uint8_t const maxSpeed = 4000000;
+uint8_t const maxSpeed = 50000000;
 #define Set_CS 0 //LOW is selected
 #define Reset_CS 1 //
 
@@ -35,19 +35,19 @@ void loop()
       ;
     }
     byte mosi = Serial.read();
-    digitalWrite(ssFPGA, Set_CS);//select slave
     for (uint8_t ii = 0; ii < 10; ii++) {
         delay( 10 );
-        SPI.beginTransaction(SPISettings(maxSpeed, MSBFIRST, SPI_MODE3)); //config SPI transaction with 03 parametter: maxSpeed/ dataOrder/ dataMode
+        SPI.beginTransaction(SPISettings(maxSpeed, MSBFIRST, SPI_MODE0)); //config SPI transaction with 03 parametter: maxSpeed/ dataOrder/ dataMode
                                                                           //need to be adapted with FPGA KIT
         {
+            digitalWrite(ssFPGA, Set_CS);//select slave
             uint8_t miso = SPI.transfer(mosi);
             Serial.print("Data received from FPGA: ");
             Serial.println(miso, HEX);
         }
+        digitalWrite(ssFPGA, Reset_CS);
         SPI.endTransaction();
-    }
-    digitalWrite( ssFPGA, Reset_CS );
+    }    
 //
 //  static int ii = 0;
 //  if (++ii % 1024 == 0) {
