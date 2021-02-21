@@ -35,19 +35,18 @@ void loop()
       ;
     }
     byte mosi = Serial.read();
-    for (uint8_t ii = 0; ii < 10; ii++) {
-        delay( 10 );
-        SPI.beginTransaction(SPISettings(maxSpeed, MSBFIRST, SPI_MODE0)); //config SPI transaction with 03 parametter: maxSpeed/ dataOrder/ dataMode
+    delay(10);
+    SPI.beginTransaction(SPISettings(maxSpeed, MSBFIRST, SPI_MODE0)); //config SPI transaction with 03 parametter: maxSpeed/ dataOrder/ dataMode
                                                                           //need to be adapted with FPGA KIT
-        {
-            digitalWrite(ssFPGA, Set_CS);//select slave
-            uint8_t miso = SPI.transfer(mosi);
-            Serial.print("Data received from FPGA: ");
-            Serial.println(miso, HEX);
-        }
-        digitalWrite(ssFPGA, Reset_CS);
-        SPI.endTransaction();
-    }    
+    digitalWrite(ssFPGA, Set_CS);//select slave
+    uint8_t miso = SPI.transfer(mosi);
+    Serial.print("SPI transfered to FPGA: ");
+    Serial.println(mosi, HEX);
+    Serial.print("Data received from FPGA: ");
+    Serial.println(miso, HEX);
+    digitalWrite(ssFPGA, Reset_CS);
+    SPI.endTransaction();
+    
 //
 //  static int ii = 0;
 //  if (++ii % 1024 == 0) {
