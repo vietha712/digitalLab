@@ -1,7 +1,7 @@
 
 /* finite state machine */
 
-module fsm(input i_Clk, input i_Rst, input i_Data, output [7:0]o_State, output o_State_en);
+module fsm(input i_Clk, input i_Rst, input i_Data_en, input i_Data, output [7:0]o_State, output o_State_en);
 	localparam IDLE        = 8'b00000000;
 	localparam STATE_1     = 8'b00000001;
 	localparam STATE_2     = 8'b00000010;
@@ -48,42 +48,45 @@ module fsm(input i_Clk, input i_Rst, input i_Data, output [7:0]o_State, output o
 		end
 		else
 		begin
-			case (l_State)
-				IDLE:
-					begin
-						if(i_Data == 1'b0)
-							l_State = STATE_2;
-						else
-							l_State = STATE_1;
-					end
-				STATE_1:
-					begin
-						if(i_Data == 1'b0)
-							l_State = STATE_2;
-						else
-							l_State = STATE_3;
-					end
-				STATE_2:
-					begin
-						if(i_Data == 1'b0)
-							l_State = STATE_3;
-						else
-							l_State = STATE_1;
-					end
-				STATE_3:
-					begin
-						if(i_Data == 1'b0)
-							l_State = STATE_2;
-						else
-							l_State = STATE_1;
-					end
-				default:
-					begin
-					end
-			endcase
-			
-			if (l_State == STATE_3)
-				l_State_en = 1'b1;
+			if (i_Data_en == 1'b1)
+				begin
+					case (l_State)
+						IDLE:
+							begin
+								if(i_Data == 1'b0)
+									l_State = STATE_2;
+								else
+									l_State = STATE_1;
+							end
+						STATE_1:
+							begin
+								if(i_Data == 1'b0)
+									l_State = STATE_2;
+								else
+									l_State = STATE_3;
+							end
+						STATE_2:
+							begin
+								if(i_Data == 1'b0)
+									l_State = STATE_3;
+								else
+									l_State = STATE_1;
+							end
+						STATE_3:
+							begin
+								if(i_Data == 1'b0)
+									l_State = STATE_2;
+								else
+									l_State = STATE_1;
+							end
+						default:
+							begin
+							end
+					endcase
+
+
+					l_State_en = 1'b1;
+				end	
 			else
 				l_State_en = 1'b0;
 		end
@@ -99,9 +102,10 @@ endmodule
 
 /* test bench for finite state machine */
 module tb_fsm;
-	reg clk, reset, data;
+	reg clk, reset, data, data_en;
 	wire [7:0]state;
 	wire state_en;
+	reg  [7:0]count = 0;
 
 	always  
 	begin 
@@ -109,18 +113,31 @@ module tb_fsm;
 		clk = 0; #10;  
 	end  
 
+	always @(posedge clk)
+	begin
+		count = count + 1;
+		if (count == 8)
+			begin
+				count   <= 0;
+				data_en <= 1;
+			end
+		else
+			data_en    <= 0;
+	end
+
+
 	initial  
 	begin  
-		reset     = 0; 
-		data      = 0; 
+		reset     <= 0;
+		data      <= 0;
 		#22; 
-		reset = 1;
+		reset     <= 1;
 	end  
 
 	// use SPI mode 0
 	always @(negedge clk)
 	begin
-		data  = $random;
+		data  <= $random;
 	end
 
 
@@ -128,6 +145,7 @@ module tb_fsm;
 	(
 		.i_Clk(clk),
 		.i_Rst(reset),
+		.i_Data_en(data_en),
 		.i_Data(data),
 		.o_State(state[7:0]),
 		.o_State_en(state_en)
