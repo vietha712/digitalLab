@@ -69,8 +69,9 @@ module SPI_Slave
   //              the "in" side captures data on the trailing edge of clock
   assign w_CPHA  = (SPI_MODE == 1) | (SPI_MODE == 3);
 
-  assign w_SPI_Clk = w_CPHA ? ~i_SPI_Clk : i_SPI_Clk;
+  //assign w_SPI_Clk = w_CPHA ? ~i_SPI_Clk : i_SPI_Clk;
 
+  assign w_SPI_Clk = ~i_SPI_Clk;  //hardcoded mode = 0
 
 
   // Purpose: Recover SPI Byte in SPI Clock Domain
