@@ -11,8 +11,8 @@ module SpiLab
 	input[35:0]  GPIO_0, //MOSI, CS
 	output[35:0] GPIO_1, //MISO
 	input CLOCK_50,
+	input[9:0] SW,
 	output[9:0] LEDR, //output LED
-	input RESET_N  // RESET_N
 	);
 
 	localparam SPI_Mode = 0; // rising edge is captured CPOL = 0, CPHA = 0
@@ -38,7 +38,7 @@ module SpiLab
 	// Instantiate FPGA board as a slave to receive the command from ESP32
 	SPI_Slave #(.SPI_MODE(SPI_Mode)) SPI_Slave_Hw
 	(
-		.i_Rst_L(RESET_N),
+		.i_Rst_L(SW[0]),
 		.i_Clk(CLOCK_50), //50 MHz
 		.o_RX_DV(w_Slave_RX_DV),
 		.o_RX_Byte(w_Slave_RX_Byte[7:0]),
@@ -57,7 +57,7 @@ module SpiLab
 	fsm fsmLab
 	(
 		.i_Clk(CLOCK_50),
-		.i_Rst(RESET_N),
+		.i_Rst(SW[1]),
 		.i_Signal (w_Slave_RX_Byte[0]),
 		.o_State(fsm_State),
 		.o_Signal(LEDR[0])
