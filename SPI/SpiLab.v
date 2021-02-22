@@ -74,8 +74,9 @@ module SpiLab
 	// FSM instance here
 	fsm fsmLab
 	(
-		.i_Clk(w_Slave_RX_DV),
+		.i_Clk(CLOCK_50),
 		.i_Rst(RESET_N),
+		.i_Data_en(w_Slave_RX_DV),
 		.i_Data (w_Slave_RX_Byte[0]),
 		.o_State(r_Slave_TX_Byte[7:0]),
 		.o_State_en(r_Slave_TX_DV)
@@ -106,6 +107,7 @@ module tb_SpiLab;
 	reg  clk, reset;
 	reg  [35:0]SpiLab_GPIO_0;
 	wire [35:0]SpiLab_GPIO_1;
+	reg  [7:0] count = 0;
 
 	reg i_SPI_Clk, o_SPI_MISO, i_SPI_MOSI, i_SPI_CS_n; // for debugging
 
@@ -115,7 +117,7 @@ module tb_SpiLab;
 		SpiLab_GPIO_0[1]     = 1;   //chip select
 		reset                = 0; 
 		#22; 
-		SpiLab_GPIO_0[1]     = 0;   //chip select
+		//SpiLab_GPIO_0[1]     = 0;   //chip select
 		reset                = 1; 
 	end
 
@@ -125,10 +127,21 @@ module tb_SpiLab;
 		clk = 0; #10; 
 	end
 
+
 	always
 	begin
 		SpiLab_GPIO_0[2] = 1; #100;
 		SpiLab_GPIO_0[2] = 0; #100;
+	end
+	always @(posedge SpiLab_GPIO_0[2])
+	begin
+		count = count + 1;
+		if (count < 9)
+			SpiLab_GPIO_0[1]     = 0;   //chip select
+		else if (count < 30)
+			SpiLab_GPIO_0[1]     = 1;   //chip select
+		else
+			count = 0;
 	end
 
 	// use SPI mode 0
