@@ -46,7 +46,7 @@ module SpiLab
 		.i_TX_Byte(r_Slave_TX_Byte[7:0]),
 		
 		// SPI interfaces
-		.i_SPI_Clk (SPI_Clk), // 10 MHz. Satisfy that the FPGA clk is 4x faster than SPI
+		.i_SPI_Clk (GPIO_0[2]), // 10 MHz. Satisfy that the FPGA clk is 4x faster than SPI
 		.o_SPI_MISO(GPIO_1[0]),
 		.i_SPI_MOSI(GPIO_0[0]),
 		.i_SPI_CS_n(GPIO_0[1])
