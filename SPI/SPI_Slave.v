@@ -199,10 +199,10 @@ module SPI_Slave
     end
     else
     begin
-      if (i_TX_DV)
-      begin
+      //if (i_TX_DV)
+      //begin
         r_TX_Byte <= i_TX_Byte; 
-      end
+      //end
     end // else: !if(~i_Rst_L)
   end // always @ (posedge i_Clk or negedge i_Rst_L)
 
