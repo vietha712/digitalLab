@@ -31,6 +31,10 @@ module SPI_Slave
    output reg [7:0] o_RX_Byte,  // Byte received on MOSI
    input            i_TX_DV,    // Data Valid pulse to register i_TX_Byte
    input  [7:0]     i_TX_Byte,  // Byte to serialize to MISO.
+	
+	//DungTT
+	output reg [7:0] o_No_Byte_rev, // Number of bits received
+	output reg [7:0] o_No_Byte_trans, // Number of bits transmitted
 
    // SPI Interface
    input      i_SPI_Clk,
@@ -38,6 +42,14 @@ module SPI_Slave
    input      i_SPI_MOSI,
    input      i_SPI_CS_n
    );
+	
+	//DungTT: to make sure r_TX_Bit_Count = 8 bits at the begin
+	initial
+		begin
+			r_TX_Bit_Count <= 3'b111;  // Send MSb first
+			r_SPI_MISO_Bit <= r_TX_Byte[3'b111];  // Reset to MSb
+		end
+		
 // Massage from Quartus Prime 2018
 // Error (10219): Verilog HDL Continuous Assignment error at SPI_Slave.v(195): object "o_SPI_MISO" on left-hand side of assignment 
 // must have a net type
@@ -76,7 +88,8 @@ module SPI_Slave
 
   // Purpose: Recover SPI Byte in SPI Clock Domain
   // Samples line on correct edge of SPI Clock
-  always @(posedge w_SPI_Clk or posedge i_SPI_CS_n)
+//  always @(posedge w_SPI_Clk or posedge i_SPI_CS_n)
+  always @(posedge w_SPI_Clk) // DungTT
   begin
     if (i_SPI_CS_n)
     begin
@@ -89,11 +102,12 @@ module SPI_Slave
 
       // Receive in LSB, shift up to MSB
       r_Temp_RX_Byte <= {r_Temp_RX_Byte[6:0], i_SPI_MOSI};
-    
       if (r_RX_Bit_Count == 3'b111)
       begin
         r_RX_Done <= 1'b1;
         r_RX_Byte <= {r_Temp_RX_Byte[6:0], i_SPI_MOSI};
+		  o_No_Byte_rev = o_No_Byte_rev + 1;//DungTT
+		  
       end
       else if (r_RX_Bit_Count == 3'b010)
       begin
@@ -139,7 +153,8 @@ module SPI_Slave
 
   // Control preload signal.  Should be 1 when CS is high, but as soon as
   // first clock edge is seen it goes low.
-  always @(posedge w_SPI_Clk or posedge i_SPI_CS_n) // it must be w_SPI_Clk. I have changed the code here.
+//  always @(posedge w_SPI_Clk or posedge i_SPI_CS_n) // it must be w_SPI_Clk. I have changed the code here.
+  always @(posedge w_SPI_Clk) // DungTT
   begin
     if (i_SPI_CS_n)
     begin

@@ -1,24 +1,20 @@
+module fsm(input i_Clk, 
+	        input i_Rst, 
+			  input i_Signal,
+//			  input i_trigger,//DungTT
+//			  output reg [7:0] o_State, 
+			  output reg [7:0] o_State);
 
-/* finite state machine */
+   localparam[7:0] 
+			IDLE = 8'b00000000,
+			STATE_1 = 8'b00000001,
+			STATE_2 = 8'b00000010,
+			STATE_3 = 8'b00000011;
 
-module fsm(input i_Clk, input i_Rst, input i_Data_en, input i_Data, output [7:0]o_State, output o_State_en);
-	localparam IDLE        = 8'b00000000;
-	localparam STATE_1     = 8'b00000001;
-	localparam STATE_2     = 8'b00000010;
-	localparam STATE_3     = 8'b00000011;
-	reg [7:0]l_State;
-	reg l_State_en;
-
-	// output from FSM
-	assign o_State[7:0] = l_State[7:0];
-	assign o_State_en   = l_State_en;
-
-
-
-	initial
+initial
 		begin
-			l_State    <= IDLE;
-			l_State_en <= 1'b0;
+			o_State    <= IDLE;
+//			l_State_en <= 1'b0;
 		end
 
 
@@ -39,117 +35,60 @@ module fsm(input i_Clk, input i_Rst, input i_Data_en, input i_Data, output [7:0]
 		Nếu nhận dữ liệu từ SPI = 1 : vào trạng thái STATE_1
 	Xuất trạng thái FSM ra màn hình mỗi khi nhận dữ liệu từ SPI
 	*/
-	always @(posedge i_Clk or negedge i_Rst)
+	always @(posedge i_Clk)
 	begin
 		if (~i_Rst)
 		begin
-			l_State    <= IDLE;
-			l_State_en <= 1'b0;
+			o_State    <= IDLE;
+//			l_State_en <= 1'b0;
 		end
 		else
-		begin
-			if (i_Data_en == 1'b1)
-				begin
-					case (l_State)
+			begin
+					case (o_State)
 						IDLE:
 							begin
-								if(i_Data == 1'b0)
-									l_State = STATE_2;
+								if(i_Signal == 1'b0)
+									o_State = STATE_2;
 								else
-									l_State = STATE_1;
+									o_State = STATE_1;
 							end
 						STATE_1:
 							begin
-								if(i_Data == 1'b0)
-									l_State = STATE_2;
+								if(i_Signal == 1'b0)
+									o_State = STATE_2;
 								else
-									l_State = STATE_3;
+									o_State = STATE_3;
 							end
 						STATE_2:
 							begin
-								if(i_Data == 1'b0)
-									l_State = STATE_3;
+								if(i_Signal == 1'b0)
+									o_State = STATE_2;
 								else
-									l_State = STATE_1;
+									o_State = STATE_1;
 							end
 						STATE_3:
 							begin
-								if(i_Data == 1'b0)
-									l_State = STATE_2;
+								if(i_Signal == 1'b0)
+									o_State = STATE_2;
 								else
-									l_State = STATE_1;
+									o_State = STATE_1;
 							end
 						default:
 							begin
 							end
 					endcase
-
-
-					l_State_en = 1'b1;
-				end	
-			else
-				l_State_en = 1'b0;
-		end
-
-		$monitor("o_State = 0x%X", o_State); 
-		$monitor("l_State = 0x%X", l_State); 
-	end
-
-endmodule
-
-
-
-
-/* test bench for finite state machine */
-module tb_fsm;
-	reg clk, reset, data, data_en;
-	wire [7:0]state;
-	wire state_en;
-	reg  [7:0]count = 0;
-
-	always  
-	begin 
-		clk = 1; #10; 
-		clk = 0; #10;  
-	end  
-
-	always @(posedge clk)
-	begin
-		count = count + 1;
-		if (count == 8)
-			begin
-				count   <= 0;
-				data_en <= 1;
 			end
-		else
-			data_en    <= 0;
 	end
 
 
-	initial  
-	begin  
-		reset     <= 0;
-		data      <= 0;
-		#22; 
-		reset     <= 1;
-	end  
+//always @(posedge i_Clk, posedge i_Rst)
+//begin
+//    if( i_Rst )
+//       o_Signal <= 0;
+//    else if( o_State == 2'b11 )
+//       o_Signal <= 1;
+//    else o_Signal <= 0;
+//
+//end
 
-	// use SPI mode 0
-	always @(negedge clk)
-	begin
-		data  <= $random;
-	end
-
-
-	fsm fsm_test_instance
-	(
-		.i_Clk(clk),
-		.i_Rst(reset),
-		.i_Data_en(data_en),
-		.i_Data(data),
-		.o_State(state[7:0]),
-		.o_State_en(state_en)
-	);
 endmodule
-
-
