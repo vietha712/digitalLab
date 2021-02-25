@@ -34,7 +34,9 @@ module SpiLab
 	wire SPI_Clk;
 	
 	//Assignment
-	assign r_Slave_TX_Byte = fsm_State;
+//	assign r_Slave_TX_Byte = fsm_State;
+	assign r_Slave_TX_Byte[7:0] = fsm_State;
+//	assign r_Slave_TX_Byte[7:0] = 8'b00110011;
 	assign LEDR[9:8] = fsm_State;//DungTT: to monitor fms_state
 	assign LEDR[7:0] = w_Slave_RX_No_Byte;//DungTT: to count number of bytes (every 8 bits) received from master
 //	assign LEDR[7:0] = w_Slave_RX_Byte;//DungTT: to monitor data received from SPI master
@@ -97,10 +99,3 @@ module SpiLab
 
 
 endmodule
-
-
-
-
-
-
-
