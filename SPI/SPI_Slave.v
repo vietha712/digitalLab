@@ -81,9 +81,10 @@ module SPI_Slave
   //              the "in" side captures data on the trailing edge of clock
   assign w_CPHA  = (SPI_MODE == 1) | (SPI_MODE == 3);
 
-  //assign w_SPI_Clk = w_CPHA ? ~i_SPI_Clk : i_SPI_Clk;
+  assign w_SPI_Clk = w_CPHA ? ~i_SPI_Clk : i_SPI_Clk;
 
-  assign w_SPI_Clk = ~i_SPI_Clk;  //hardcoded mode = 0
+
+//  assign w_SPI_Clk = ~i_SPI_Clk;  //hardcoded mode = 0
 
 
   // Purpose: Recover SPI Byte in SPI Clock Domain
@@ -213,5 +214,6 @@ module SPI_Slave
   // Tri-statae MISO when CS is high.  Allows for multiple slaves to talk.
   //assign o_SPI_MISO = i_SPI_CS_n ? 1'bZ : w_SPI_MISO_Mux;
   assign o_SPI_MISO = i_SPI_CS_n ? 1'bZ : r_SPI_MISO_Bit;
+//assign o_SPI_MISO = i_SPI_CS_n ? 1'bZ : 1'b1;
 
 endmodule // SPI_Slave
